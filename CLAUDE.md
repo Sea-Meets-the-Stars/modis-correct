@@ -25,6 +25,12 @@ The next step would be to generate a dataset of orbit number, scan group--there 
 
 When we are convinced that it is working properly, I then like you to run the whole thing; i.e., on all 100,000 orbits. This this information I can get great stats on the noise in some of the detectors and how it is changing in time, to some extent along the scan line and in each orbit.
 
+# Data
+
+## Coordinates
+
+The latitude and longitude of the center of each pixel is stored in the data files.
+
 # Nomenclature
 
 ## Detectors
@@ -37,6 +43,7 @@ We will label these D=1-10
 A bow-tie is a group of 10 scan lines, one from each detector. 
 These occur sequentially during an orbit.
 
+For each orbit, the first scan line has D=6.
 
 ## Mirror
 
@@ -51,7 +58,7 @@ We will refer to these as P=1-1354.
 
 ## Match-up
 
-A match-up is two pixels from separate bow-ties that overlap spatially.
+A match-up is two pixels from separate bow-ties that overlap spatially.  They are defined by their separation distance in meters.
 
 ## Overlap
 
