@@ -64,8 +64,8 @@ These requirements implement Approach 2 (Column-Wise Vectorized Haversine) from 
 
 9. Iterate over each candidate detector pair (D_i, D_j) from the candidate table
 10. For each pair, extract the latitude/longitude of detector D_i in bow-tie B_k and detector D_j in bow-tie B_{k+1}, for all adjacent bow-tie boundaries and all candidate columns P simultaneously — these are 2-D arrays of shape (N_bt - 1, N_P)
-11. Compute the Haversine great-circle distance between pixel centers using vectorized NumPy operations
-12. Identify all pairs where d < d_max
+11. Compute the Haversine great-circle distance between pixel centers using vectorized NumPy operations across both bow-tie boundaries and columns in a single call
+12. Identify all pairs where d < d_max and record the match-ups
 
 ### Mirror Side Tracking
 
@@ -85,7 +85,7 @@ These requirements implement Approach 2 (Column-Wise Vectorized Haversine) from 
 
 ### Performance
 
-17. Use vectorized NumPy operations throughout — no Python-level loops over pixels or bow-tie boundaries
+17. Use vectorized NumPy operations throughout — no Python-level loops over columns or bow-tie boundaries
 18. The only Python loop should be over candidate detector pairs (~6-12 iterations)
 19. Target processing time: < 10 seconds per orbit on a single core
 20. Peak memory: < 1 GB per orbit (the lat/lon arrays are ~200 MB each in float32)
@@ -115,3 +115,9 @@ These requirements implement Approach 2 (Column-Wise Vectorized Haversine) from 
 ### Requirements
 
 1. Please generate a set of requirements using Approach 2 in our plan.  Add those to the Requirements section above.
+2. Modify the requirements to reflect that the search for match-ups only need to occur within a given column and one must search over all columns.
+3. Revert back to vectorize over columns.
+
+### Coding
+
+1. Reread the doc. Generate the code to meet the requirements.  Push to the dev/matchups/py directory. Call it modis_matchups.py.  Use a portion of the data in modis-correct/dev/matchups/data/ to test the code.  Generate figures to show the match-ups.

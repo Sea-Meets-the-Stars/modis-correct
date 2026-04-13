@@ -76,6 +76,8 @@ Adhere to following:
 - Include inline comments
 - Use matplotlib for plotting
 
+If you run Python code, use the "ocean14" conda environment.
+
 # Overleaf
 
 Place any Latex files in /home/xavier/Projects/overleaf/modis-correct/
