@@ -51,40 +51,58 @@ def equirect_project(lat, lon, lat0, lon0):
 # Step 1: Find intersection
 # ============================================================
 
-def find_intersection(lat_ref, lon_ref, lat_meas, lon_meas, cols):
-    """Find the column where two scan lines cross.
+def find_intersection(lat_ref, lon_ref, lat_meas, lon_meas, cols,
+                      poly_deg=8):
+    """Find where two scan lines cross by fitting smooth polynomial curves.
 
-    Uses latitude difference as proxy for along-track displacement.
-    A sign change in (lat_meas - lat_ref) indicates a crossing.
+    Fits degree-8 polynomials to the latitude of each scan line as a
+    function of column index, then finds where the two fitted curves
+    intersect (delta_lat_fit = 0).  This completely eliminates the
+    ~111 m geolocation quantization zigzag that plagued earlier
+    approaches, producing a single clean crossing per side of nadir.
 
     Parameters
     ----------
     lat_ref, lon_ref : 1D array (1354,), reference scan line (leading D)
     lat_meas, lon_meas : 1D array (1354,), measured scan line (trailing D)
     cols : 1D array of 0-indexed columns to search (one side of nadir)
+    poly_deg : int, polynomial degree for the curve fits (default 8)
 
     Returns
     -------
     cross_col : float (0-indexed, interpolated) or None if no crossing
     """
-    delta = lat_meas[cols] - lat_ref[cols]
-    signs = np.sign(delta)
-
-    # Find sign changes
-    sign_changes = np.where(np.diff(signs) != 0)[0]
-    if len(sign_changes) == 0:
+    if len(cols) < poly_deg + 2:
         return None
 
-    # Use the first sign change
-    idx = sign_changes[0]
-    c0, c1 = float(cols[idx]), float(cols[idx + 1])
-    d0, d1 = float(delta[idx]), float(delta[idx + 1])
+    x = cols.astype(np.float64)
 
-    # Linear interpolation for sub-pixel precision
-    if d1 == d0:
-        return c0
-    frac = -d0 / (d1 - d0)
-    return c0 + frac * (c1 - c0)
+    # Fit smooth polynomials to lat(P) for each scan line
+    p_ref = np.polyfit(x, lat_ref[cols].astype(np.float64), poly_deg)
+    p_meas = np.polyfit(x, lat_meas[cols].astype(np.float64), poly_deg)
+
+    # Delta polynomial: where meas_fit(P) - ref_fit(P) = 0
+    p_delta = np.polysub(p_meas, p_ref)
+
+    # Find roots of the delta polynomial
+    roots = np.roots(p_delta)
+
+    # Keep only real roots within the column range (with margin)
+    margin = 10
+    real_mask = np.abs(roots.imag) < 1e-6
+    real_roots = roots[real_mask].real
+    valid = real_roots[(real_roots >= cols[0] + margin) &
+                       (real_roots <= cols[-1] - margin)]
+
+    if len(valid) == 0:
+        return None
+
+    if len(valid) == 1:
+        return float(valid[0])
+
+    # Multiple crossings: pick the most interior one (furthest from edges)
+    center = (cols[0] + cols[-1]) / 2.0
+    return float(valid[np.argmin(np.abs(valid - center))])
 
 
 # ============================================================

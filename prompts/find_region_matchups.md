@@ -143,6 +143,12 @@ Name the Notebook Test_region.ipynb and put it in modis-correct/dev/matchups/nb.
 3.  Generate a MATLAB file that performs the same functionality as provided by the Python code.  And create a test script that mirrors the IPython Notebook.  Put those files in 
 modis-correct/dev/matchups/mat.
 
+4. The algorithm you generated for finding the intersecton -- find_intersection() -- is not sufficiently accurate and too unstable to small fluctuations in the scanline lat/long values.  Please generate a new version.  Generate a new module called test_regions.py in py/ and add a method that shows one or more figures describing the intersection.
+
+5. The intersection algorithm is still flawed.  It would be best to fit a smooth curve to each scan line and then find the intersection of the two curves.  Try this approach and update the find_intersection() method and diagnostic figures.
+
+6. Ok, that is better.  But you will need to fit the scanlines in lat vs. lon, not lat vs. column P.  Then find where those 2 curves intersect and figure out the best P to the nearest integer. 
+
 ## Prompts
 
 ### Brainstorming
@@ -159,3 +165,6 @@ modis-correct/dev/matchups/mat.
 1. Re-read this file and generate the code to implement the first description under the Development phase above.
 2. Re-read this file and perform item 2 of the Development phase.
 3. Re-read this file and perform item 3 of the Development phase.
+4. Re-read this file and perform item 4 of the Development phase.
+5. Re-read this file and perform item 5 of the Development phase.
+6. Re-read this file and perform item 6 of the Development phase.
