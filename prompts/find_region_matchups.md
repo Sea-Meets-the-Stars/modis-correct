@@ -140,6 +140,8 @@ Name the Notebook Test_region.ipynb and put it in modis-correct/dev/matchups/nb.
 - For Step 1 in the Notebook(scan-line intersection), add a figure that shows the two scan lines intersecting lat/lon space.  Zoom-in as appropriate.
 - For Step 2 in the Notebook, add a separate figure showing the fitted line on the scan line.  Zoom in as appropriate
 
+3.  Generate a MATLAB file that performs the same functionality as provided by the Python code.  And create a test script that mirrors the IPython Notebook.  Put those files in 
+modis-correct/dev/matchups/mat.
 
 ## Prompts
 
@@ -156,3 +158,4 @@ Name the Notebook Test_region.ipynb and put it in modis-correct/dev/matchups/nb.
 
 1. Re-read this file and generate the code to implement the first description under the Development phase above.
 2. Re-read this file and perform item 2 of the Development phase.
+3. Re-read this file and perform item 3 of the Development phase.
