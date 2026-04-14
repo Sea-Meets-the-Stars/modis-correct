@@ -51,15 +51,29 @@ def equirect_project(lat, lon, lat0, lon0):
 # Step 1: Find intersection
 # ============================================================
 
+def _unwrap_lon(lon):
+    """Unwrap longitude to remove 360-degree jumps (antimeridian crossings)."""
+    lon_uw = lon.copy()
+    d = np.diff(lon_uw)
+    for i in range(len(d)):
+        if d[i] > 180:
+            lon_uw[i + 1:] -= 360
+        elif d[i] < -180:
+            lon_uw[i + 1:] += 360
+    return lon_uw
+
+
 def find_intersection(lat_ref, lon_ref, lat_meas, lon_meas, cols,
                       poly_deg=8):
-    """Find where two scan lines cross by fitting smooth polynomial curves.
+    """Find where two scan lines cross in lat/lon space.
 
-    Fits degree-8 polynomials to the latitude of each scan line as a
-    function of column index, then finds where the two fitted curves
-    intersect (delta_lat_fit = 0).  This completely eliminates the
-    ~111 m geolocation quantization zigzag that plagued earlier
-    approaches, producing a single clean crossing per side of nadir.
+    Fits smooth polynomial curves lat = f(lon) for each scan line,
+    then finds the longitude where the two curves intersect.  The
+    intersection longitude is mapped back to the nearest integer
+    column P.
+
+    Longitude is unwrapped before fitting to handle antimeridian
+    crossings at high latitudes.
 
     Parameters
     ----------
@@ -70,39 +84,69 @@ def find_intersection(lat_ref, lon_ref, lat_meas, lon_meas, cols,
 
     Returns
     -------
-    cross_col : float (0-indexed, interpolated) or None if no crossing
+    cross_col : int (0-indexed) or None if no crossing found
     """
     if len(cols) < poly_deg + 2:
         return None
 
-    x = cols.astype(np.float64)
+    lat_r = lat_ref[cols].astype(np.float64)
+    lon_r = _unwrap_lon(lon_ref[cols].astype(np.float64))
+    lat_m = lat_meas[cols].astype(np.float64)
+    lon_m = _unwrap_lon(lon_meas[cols].astype(np.float64))
 
-    # Fit smooth polynomials to lat(P) for each scan line
-    p_ref = np.polyfit(x, lat_ref[cols].astype(np.float64), poly_deg)
-    p_meas = np.polyfit(x, lat_meas[cols].astype(np.float64), poly_deg)
+    # Center and scale longitude for numerical conditioning
+    lon_all = np.concatenate([lon_r, lon_m])
+    lon_mu = np.mean(lon_all)
+    lon_sd = np.std(lon_all)
+    if lon_sd < 1e-10:
+        return None
+    lon_r_n = (lon_r - lon_mu) / lon_sd
+    lon_m_n = (lon_m - lon_mu) / lon_sd
 
-    # Delta polynomial: where meas_fit(P) - ref_fit(P) = 0
+    # Fit lat = f(lon_normalized) for each scan line
+    p_ref = np.polyfit(lon_r_n, lat_r, poly_deg)
+    p_meas = np.polyfit(lon_m_n, lat_m, poly_deg)
+
+    # Intersection: where f_meas(lon_n) - f_ref(lon_n) = 0
     p_delta = np.polysub(p_meas, p_ref)
+    roots_n = np.roots(p_delta)
 
-    # Find roots of the delta polynomial
-    roots = np.roots(p_delta)
+    # Keep only real roots, then un-normalize
+    real_mask = np.abs(roots_n.imag) < 1e-6
+    real_roots_n = roots_n[real_mask].real
+    real_roots_lon = real_roots_n * lon_sd + lon_mu
 
-    # Keep only real roots within the column range (with margin)
-    margin = 10
-    real_mask = np.abs(roots.imag) < 1e-6
-    real_roots = roots[real_mask].real
-    valid = real_roots[(real_roots >= cols[0] + margin) &
-                       (real_roots <= cols[-1] - margin)]
+    # Filter to overlapping longitude range (with margin)
+    lon_lo = max(lon_r.min(), lon_m.min())
+    lon_hi = min(lon_r.max(), lon_m.max())
+    lon_margin = 0.02 * (lon_hi - lon_lo)
+    valid_lon = real_roots_lon[(real_roots_lon >= lon_lo + lon_margin) &
+                               (real_roots_lon <= lon_hi - lon_margin)]
 
-    if len(valid) == 0:
+    if len(valid_lon) == 0:
         return None
 
-    if len(valid) == 1:
-        return float(valid[0])
+    # Map each crossing longitude to the nearest column P
+    candidates = []
+    for lc in valid_lon:
+        idx = int(np.argmin(np.abs(lon_r - lc)))
+        P = int(cols[idx])
+        candidates.append(P)
 
-    # Multiple crossings: pick the most interior one (furthest from edges)
-    center = (cols[0] + cols[-1]) / 2.0
-    return float(valid[np.argmin(np.abs(valid - center))])
+    # Edge margin: reject columns within 10 of the search boundary
+    margin = 10
+    candidates = [P for P in candidates
+                  if P >= cols[0] + margin and P <= cols[-1] - margin]
+    if len(candidates) == 0:
+        return None
+
+    if len(candidates) == 1:
+        return candidates[0]
+
+    # Multiple: pick the one furthest from nadir (where bow-tie
+    # crossings physically occur)
+    nadir_col = NADIR_COL - 1  # 0-indexed nadir
+    return max(candidates, key=lambda P: abs(P - nadir_col))
 
 
 # ============================================================
