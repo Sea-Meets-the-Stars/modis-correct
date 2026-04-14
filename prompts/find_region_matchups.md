@@ -134,6 +134,13 @@ For testing purposes, generate an IPython Notebook that operates on
 one pair of bow-ties using the data in the modis-correct/dev/matchups/data/latlon.mat file.  
 Name the Notebook Test_region.ipynb and put it in modis-correct/dev/matchups/nb.  Include figures that demonstrate the algorithm works.
 
+2. Please make the modifications to the Notebook
+
+- Use q_max = 5% instead of 1%
+- For Step 1 in the Notebook(scan-line intersection), add a figure that shows the two scan lines intersecting lat/lon space.  Zoom-in as appropriate.
+- For Step 2 in the Notebook, add a separate figure showing the fitted line on the scan line.  Zoom in as appropriate
+
+
 ## Prompts
 
 ### Brainstorming
@@ -148,3 +155,4 @@ Name the Notebook Test_region.ipynb and put it in modis-correct/dev/matchups/nb.
 ### Development
 
 1. Re-read this file and generate the code to implement the first description under the Development phase above.
+2. Re-read this file and perform item 2 of the Development phase.
