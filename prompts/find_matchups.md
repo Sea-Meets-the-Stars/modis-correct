@@ -104,6 +104,17 @@ These requirements implement Approach 2 (Column-Wise Vectorized Haversine) from 
 
 ## Development phase
 
+### Notebooks
+
+1. Generate a Python Notebook that does the following:
+
+- Load the data from the data/latlon.mat file
+- Given a bowtie number B, plot the lat/lon of that bowtie for each detector as one color and those of the next bowtie B+1 as a different color.
+- Calculate the haversine distances, restricted to columns between the two bowties and generate a historgram of these.
+- As possible, use existing code in modis_matchups.py
+- Name the Notebook Explore_bowtie.ipynb and put it in modis-correct/dev/matchups/nb/
+
+
 ## Prompts
 
 ### Brainstorming
@@ -118,6 +129,17 @@ These requirements implement Approach 2 (Column-Wise Vectorized Haversine) from 
 2. Modify the requirements to reflect that the search for match-ups only need to occur within a given column and one must search over all columns.
 3. Revert back to vectorize over columns.
 
+### Development
+
+1.  Re read this doc. Generate the first Notebook described in Development phase/Notebooks above.
+
 ### Coding
 
 1. Reread the doc. Generate the code to meet the requirements.  Push to the dev/matchups/py directory. Call it modis_matchups.py.  Use a portion of the data in modis-correct/dev/matchups/data/ to test the code.  Generate figures to show the match-ups.
+2. Add a new script -- py/test_modis_matchups.py -- to test the code.  It should input a d_max value and run the code and place figures and results in the dev/matchups/outputs directory.  Name the files according to d_max.
+3. In the test outputs, I see many examples with 0m separation.  Check whether these are in error.  Such small values are unlikely unless you are comparing the same pixel.
+
+### Testing
+
+1. I am seeing many tens of matchups for bowtie 4021 in the matchups_dmax40.csv table in outputs/  This seems to be too many.  Please explore.
+2. Generate a figure showing the Column and row of the matchups between detector 10 and 1.  Row is defined as (bowtie number - 1) * 10 + detector number.  Use the outputs in outputs/matchups_dmax40.csv.  Save the code to generate the figure in the dev/matchups/py/testing_figs.py.  Color the dots according to the matchup separation.
