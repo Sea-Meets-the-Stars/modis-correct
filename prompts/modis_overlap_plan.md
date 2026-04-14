@@ -77,7 +77,7 @@ For each valid matchup, save the following information:
 
 | Field | Description | Dimensions |
 |-------|-------------|-----------|
-| `scan_i` | Scan line number for detector group 1-5 | scalar |
+| `scan_i` | Scan line number ranging from 1 to approximately 40000 | scalar |
 | `scan_j` | Scan line number for detector group crossing | scalar |
 | `detector_i` | Detector number in scan i (1-5) | scalar |
 | `detector_j` | Detector number in scan j | scalar |
@@ -127,9 +127,3 @@ Please write a MATLAB script that:
    - Scan lines at swath edges (where geometry may be different)
 
 The code should be modular, well-commented, and structured for efficient processing of the full 100,000-orbit dataset (with options for testing on smaller subsets first).
-
----
-
-Does this prompt accurately capture your requirements? Should I adjust any aspects before proceeding with the code?
-
-

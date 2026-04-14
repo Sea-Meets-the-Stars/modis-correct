@@ -55,14 +55,18 @@ Each bow-tie uses either M=1 or M=2.
 
 Each scan line from a detector has 1354 pixels.  
 We will refer to these as P=1-1354.
+There are 10 scan lines per complete bow-tie.
+There are over 40000 scan lines per orbit.
 
 ## Match-up
 
-A match-up is two pixels from separate bow-ties that overlap spatially.  They are defined by their separation distance in meters.
+A match-up is two sets of pixels (each with the same number of pixels) from separate bow-ties that overlap spatially. 
+It can be defined as one starting and one end point pixel, 
+which are identical for the two overlapping scan lines.
 
 ## Overlap
 
-The overlap is the area of the two pixels that overlap relative to the mean area of the two pixels.  Overlap=1 is perfect overlap.
+The overlap is the area of the two sets of pixels that overlap relative to the mean area of the two sets of pixels.  Overlap=1 is perfect overlap.
 
 # Code guidelines
 
