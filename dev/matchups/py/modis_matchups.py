@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import scipy.io
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import time
